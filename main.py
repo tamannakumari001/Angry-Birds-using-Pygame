@@ -1,30 +1,57 @@
-# import os
-# import sys
-# import math
-# import time
-import pygame
-from Modules import blocks
+from initialized import *
 
-pygame.init()
-
-screen=pygame.display.set_mode((1280,720))
-clock = pygame.time.Clock()
-running=True
-width , height = screen.get_size()
-background = pygame.transform.scale(pygame.image.load('Resources/background.png').convert_alpha(),(width,height))
-bs1 = blocks.block_set(screen)
 
 while  running:
     events=pygame.event.get()
     for event in events:
         if event.type==pygame.QUIT:
             running=False
+            pygame.quit()
+            sys.exit()
 
+    mouse = pygame.mouse.get_pos()
     screen.blit(background,(0,0))
-    bs1.create_block_set((100,500),0)
-    bs1.create_block_set((width - 100, 500),1)
-    pygame.display.flip()
-    clock.tick(60)
+    pygame.display.set_caption('Angry Birds')
+    if (play_button.is_clicked()):
+        play_button.active = True
+    if (play_button.active):
+        bs0.create_block_set(bs_0_pos,0)
+        bs1.create_block_set(bs_1_pos,1)
+        screen.blit(sling0,sling0_rect)
+        screen.blit(sling1,sling1_rect)
+        b_Rect.center = (b.x,b.y)
+        if (b.isactive):
+            screen.blit(b.surface,b_Rect)
+
+            launch_bird(b,b_Rect,mouse,sling1_center)
+            if collide_bird(b,bs_0_rect):
+                damage_done(b,bs_0_rect,0,bs_0_pos,bs0)
+
+        if b.ready: b.update()
+    else:
+        play_button.display()
 
 
-pygame.quit()
+
+    #Intro Screen
+
+
+
+
+    # bs0.create_block_set(bs_0_pos,0)
+    # bs1.create_block_set(bs_1_pos,1)
+    # screen.blit(sling0,sling0_rect)
+    # screen.blit(sling1,sling1_rect)
+    # b_Rect.center = (b.x,b.y)
+    # if (b.isactive):
+    #     screen.blit(b.surface,b_Rect)
+
+    #     launch_bird(b,b_Rect,mouse,sling1_center)
+    #     if collide_bird(b,bs_0_rect):
+    #         damage_done(b,bs_0_rect,0,bs_0_pos,bs0)
+
+    # if b.ready: b.update()
+    pygame.display.update()
+    clock.tick(600)
+
+
