@@ -7,8 +7,7 @@ A CS104 Project where we use the Pygame-ce Module in Python to design an angry B
 
 ## Setting Up Venv
 
-install pygame and numpy
-Copyrights to the github repos
+Setting up a virtual environment to run this project
 
 ```
 python -m venv venv
@@ -16,4 +15,5 @@ source venv/bin/activate
 python -m pip install -r requirements.txt
 
 ```
+
 
