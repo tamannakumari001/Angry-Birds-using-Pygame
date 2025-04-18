@@ -8,14 +8,23 @@ class Button:
         self.active = False
         self.buttonrect = buttonImage.get_rect(center = self.pos)
         self.buttonImage = buttonImage
+        self.buttonImageactive=pygame.transform.scale(self.buttonImage, (self.buttonImage.get_width() + 20, self.buttonImage.get_height() + 20))
+        self.buttonactiverect = self.buttonImageactive.get_rect(center = self.pos)
 
     def display(self):
-        self.screen.blit(self.buttonImage, self.buttonrect)
+        if self.buttonrect.collidepoint(pygame.mouse.get_pos()):
+            self.screen.blit(self.buttonImageactive, self.buttonactiverect)
+        else:
+            self.screen.blit(self.buttonImage,self.buttonrect)
         
     def is_clicked(self):
-        if (self.buttonrect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]):
+        if (self.buttonrect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_just_pressed()[0]):
             return True
         return False
+    
+    class MainMenu:
+        pass
+
     
 
 

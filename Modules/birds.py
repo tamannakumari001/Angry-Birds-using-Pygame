@@ -8,6 +8,8 @@ stone_type = 2
 ice_type = 3
 
 
+
+
 class bird():
     def __init__(self,width,height,x,y):
         self.width = width
@@ -17,12 +19,18 @@ class bird():
         self.isactive = False
         self.ready = False
         self.velocity = [0,0]
+        self.being_dragged = False
 
     def update(self):
         if self.isactive:
             self.velocity[1] = self.velocity[1] + g*dt
             self.x += self.velocity[0]*dt
-            self.y += self.velocity[1]*dt + 0.5*g*dt*dt
+            self.y += self.velocity[1]*dt 
+
+
+
+
+    
         
 
 
