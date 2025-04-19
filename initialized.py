@@ -79,6 +79,8 @@ quit_button = Buttons.Button("Quit", (width - 120, 100), screen, quit_button_ima
 input_player0 = pygame.Rect(width/2 - input_box_x/2, height/2 - 20 - input_box_y, input_box_x, input_box_y )
 input_player1 = pygame.Rect(width/2 - input_box_x/2, height/2 + 20 + input_box_y, input_box_x, input_box_y )
 input0_bool = input1_bool =True
+input_box = pygame.image.load("Resources/intro_box.png").convert_alpha()
+input_box = pygame.transform.scale(input_box,(input_box_x+70,input_box_y+140))
 both_inputs_done = False
 player0 = players.player("",bs0,sling0_center)
 player1 = players.player("",bs1,sling1_center)

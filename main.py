@@ -10,7 +10,6 @@ while True:
     events=pygame.event.get()
     for event in events:
         if event.type==pygame.QUIT:
-            running=False
             pygame.quit()
             sys.exit()
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -62,7 +61,7 @@ while True:
 
 
         if (input0_bool):
-            draw_input(screen,input_player0,"Black", "Player1", font,player0.name)
+            draw_input(screen,input_player0,"Black", "Player1", font,player0.name,input_box)
         else:
             screen.blit(text_surface_0, text_surface_0_Rect)
             for index in range(len(player0.birds)):
@@ -70,7 +69,7 @@ while True:
 
 
         if input1_bool:
-            draw_input(screen,input_player1,"Black", "Player2", font,player1.name)
+            draw_input(screen,input_player1,"Black", "Player2", font,player1.name,input_box)
         else:
             screen.blit(text_surface_1,text_surface_1_Rect)
             for index in range(len(player1.birds)):
@@ -127,7 +126,7 @@ while True:
             if (b.isactive):
                 b_Rect.center = (b.x,b.y)
                 screen.blit(b.surface,b_Rect)
-                launch_bird(b,b_Rect,mouse,active_player.start)
+                launch_bird(b,b_Rect,mouse,active_player.start,target_side)
                 if (b.being_dragged):
                     show_trajectory(b,active_player.start,5,screen,target_side)
                 if collide_bird(b,target_bs):
@@ -135,6 +134,7 @@ while True:
                 if b.y > height or b.x < 0 or b.x > width : 
                     b.isactive = False
                     b.ready = False
+                    b.being_dragged = False
                     active_player.deactivate_player()
                     target.activate_player()
 
@@ -169,6 +169,6 @@ while True:
         quit_button.display()
 
     pygame.display.update()
-    clock.tick(600)
+    clock.tick(6000)
 
 

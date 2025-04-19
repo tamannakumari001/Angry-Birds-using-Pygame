@@ -1,7 +1,6 @@
 import pygame
 dt = 1/600
 g=561
-power_Factor = 10
 all_type = 0
 wood_type = 1
 stone_type = 2

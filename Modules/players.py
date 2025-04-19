@@ -4,7 +4,7 @@ class player:
     def __init__(self,name,block_Set: blocks.block_set,sling):
         self.name = name
         self.birds = []
-        self.score = 1000
+        self.score = 20
         self.active = False
         self.current_bird = 2
         self.bs = block_Set

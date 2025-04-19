@@ -3,9 +3,10 @@ from Modules import birds,blocks,players,Buttons
 
 power_factor = 10
 t = 1
+crown_fact = 1
 
 
-def launch_bird(object : birds.bird, rect : pygame.Rect, mouse_pos, sling_pos):
+def launch_bird(object : birds.bird, rect : pygame.Rect, mouse_pos, sling_pos,side):
     if rect.collidepoint(mouse_pos):
         if(pygame.mouse.get_pressed()[0]):
             object.ready = True
@@ -13,13 +14,13 @@ def launch_bird(object : birds.bird, rect : pygame.Rect, mouse_pos, sling_pos):
             object.x = mouse_pos[0]
             object.y = mouse_pos[1]
         if(pygame.mouse.get_just_released()[0]):
-            object.velocity[0] = (sling_pos[0] - object.x)*power_factor
-            object.velocity[1] = (sling_pos[1] - object.y)*power_factor
+            object.velocity[0] = min(abs(sling_pos[0] - object.x)*power_factor,1500)*(-1)**(side-1)
+            object.velocity[1] = min((sling_pos[1] - object.y)*power_factor,1500)
             object.being_dragged = False
 
 def show_trajectory(object : birds.bird,sling_pos,number,screen : pygame.Surface,side):
-    u = (sling_pos[0] - object.x)*power_factor
-    v = (sling_pos[1] - object.y)*power_factor
+    u = min(abs(sling_pos[0] - object.x)*power_factor,1500)*(-1)**(side-1)
+    v = min((sling_pos[1] - object.y)*power_factor,1500)
     for i in range(number):
         i = i/5
         x = object.x + u*i
@@ -53,8 +54,10 @@ def damage_done(bird : birds.bird, done_to_side,bs_pos,player_target: players.pl
         bird.ready = False
         if (player_target.bs.arr[block_index[0],block_index[1]] == bird.type):
             dec = 50
+        elif bird.type == 0:
+            dec = 30
         else:
-            dec = 25   
+            dec = 20 
         player_target.bs.health[block_index[0],block_index[1]] -= dec
         player_target.score = player_target.score - dec
         if player_target.bs.health[block_index[0],block_index[1]] < 0:
@@ -64,8 +67,9 @@ def damage_done(bird : birds.bird, done_to_side,bs_pos,player_target: players.pl
         player_target.activate_player()
 
 
-def draw_input(screen: pygame.Surface,input_rect : pygame.Rect, color, player : str,font : pygame.font,player_name):
-    pygame.draw.rect(screen,color,input_rect)
+def draw_input(screen: pygame.Surface,input_rect : pygame.Rect, color, player : str,font : pygame.font,player_name,border):
+    pygame.draw.rect(screen,color,input_rect,border_radius=10)
+    screen.blit(border,(input_rect.x-5,input_rect.y-input_rect.height+20))
     text_surface = font.render("Enter " + player, True, "White")
     screen.blit(text_surface,(input_rect.x + 130, input_rect.y + 10))
     text_surface = font.render(player_name,True,"White")
@@ -83,17 +87,19 @@ def select_birds(player: players.player, b1:Buttons.Button,b2:Buttons.Button,b3:
         player.birds.append(B4)
 
 def winner_display(winner : players.player, screen : pygame.Surface,font : pygame.font):
-    global t
+    global t,crown_fact
     winner_surf = pygame.transform.scale(winner.birds[0].surface1,(1500/t,1500/t))
     winner_rect = winner_surf.get_rect(center = (screen.get_width()/2, screen.get_height()/2))
     crown_surf = pygame.transform.scale(pygame.image.load('Resources/crown.png'),(300,300))
-    crown_rect = crown_surf.get_rect(center = (screen.get_width()/2,screen.get_height()/2-200 + t*10 - 40))
+    crown_rect = crown_surf.get_rect(center = (screen.get_width()/2,screen.get_height()/2 - 200 + (crown_fact**2)*10 - 640))
     screen.blit(winner_surf,winner_rect)
     screen.blit(crown_surf, crown_rect)
     if (t<4): t += 0.5
+    if (crown_fact < 8): crown_fact+=0.5
     winner_name_surf = font.render(winner.name, True, "Black")
     winner_name_rect = winner_name_surf.get_rect(center = (screen.get_width()/2,5*screen.get_height()/6))
     screen.blit(winner_name_surf,winner_name_rect)
+    screen.blit(crown_surf,crown_rect)
 
     
 
