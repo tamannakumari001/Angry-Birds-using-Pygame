@@ -1,4 +1,5 @@
 from initialized import *
+import time
 # import random
 
 
@@ -61,19 +62,19 @@ while True:
 
 
         if (input0_bool):
-            draw_input(screen,input_player0,"Black", "Player1", font,player0.name,input_box)
+            draw_input(screen,input_player0,"Black", "Player1", font,player0.name,input_box,factor_x,factor_y)
         else:
             screen.blit(text_surface_0, text_surface_0_Rect)
             for index in range(len(player0.birds)):
-                screen.blit(player0.birds[index].surface, (width/2 -200-100*index,100))
+                screen.blit(player0.birds[index].surface, (width/2 -(200-100*index)*factor_x,100*factor_y))
 
 
         if input1_bool:
-            draw_input(screen,input_player1,"Black", "Player2", font,player1.name,input_box)
+            draw_input(screen,input_player1,"Black", "Player2", font,player1.name,input_box,factor_x,factor_y)
         else:
             screen.blit(text_surface_1,text_surface_1_Rect)
             for index in range(len(player1.birds)):
-                screen.blit(player1.birds[index].surface, (width/2 + 160 + 100*index,100))
+                screen.blit(player1.birds[index].surface, (width/2 + (160 + 100*index)*factor_x,100*factor_y))
 
 
         if (not(input0_bool or input1_bool)):
@@ -81,9 +82,9 @@ while True:
 
         if (both_inputs_done):
             if (len(player0.birds)<3):
-                select_birds(player0,red_menu,blue_menu,chuck_menu,bomb_menu,screen,font_menu,red_0,blue_0,chuck_0,bomb_0)
+                select_birds(player0,red_menu,blue_menu,chuck_menu,bomb_menu,screen,font_menu,red_0,blue_0,chuck_0,bomb_0,factor_y)
             elif (len(player1.birds)<3):
-                select_birds(player1,red_menu,blue_menu,chuck_menu,bomb_menu,screen,font_menu,red_1,blue_1,chuck_1,bomb_1)
+                select_birds(player1,red_menu,blue_menu,chuck_menu,bomb_menu,screen,font_menu,red_1,blue_1,chuck_1,bomb_1,factor_y)
             else:
                 game_start = True
                 if (player0.active):
@@ -116,8 +117,8 @@ while True:
 
 
 
-        bs0.create_block_set(bs_0_pos,0)
-        bs1.create_block_set(bs_1_pos,1)
+        bs0.create_block_set(bs_0_pos,0,block_side)        
+        bs1.create_block_set(bs_1_pos,1,block_side)
         screen.blit(sling0,sling0_rect)
         screen.blit(sling1,sling1_rect)
 
@@ -127,10 +128,13 @@ while True:
                 b_Rect.center = (b.x,b.y)
                 screen.blit(b.surface,b_Rect)
                 launch_bird(b,b_Rect,mouse,active_player.start,target_side)
+                if b.just_launched:
+                    release_time =time.time()
+                    b.just_launched = False
                 if (b.being_dragged):
-                    show_trajectory(b,active_player.start,5,screen,target_side)
+                    show_trajectory(b,active_player.start,5,screen,target_side,factor_x,factor_y)
                 if collide_bird(b,target_bs):
-                    damage_done(b,target_side,target_pos,target,active_player)
+                    damage_done(b,target_side,target_pos,target,active_player,block_side)
                 if b.y > height or b.x < 0 or b.x > width : 
                     b.isactive = False
                     b.ready = False
@@ -152,14 +156,15 @@ while True:
                 screen.blit(score_0, score_0_Rect)
 
 
-            if b.ready: b.update()
+            if b.ready:
+                b.update(factor_x,factor_y)
     else:
         play_button.display()
     
     if game_over:
         screen.blit(score_1, score_1_Rect)  
         screen.blit(score_0, score_0_Rect)
-        winner_display(winner,screen,font_winner)
+        winner_display(winner,screen,font_winner,factor_x)
  
  
     if (quit_button.active):

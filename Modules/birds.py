@@ -1,6 +1,6 @@
 import pygame
-dt = 1/600
 g=561
+dt = (1/600)
 all_type = 0
 wood_type = 1
 stone_type = 2
@@ -17,14 +17,15 @@ class bird():
         self.y = y
         self.isactive = False
         self.ready = False
+        self.just_launched = False
         self.velocity = [0,0]
         self.being_dragged = False
 
-    def update(self):
+    def update(self,factor_x,factor_y):
         if self.isactive:
-            self.velocity[1] = self.velocity[1] + g*dt
-            self.x += self.velocity[0]*dt
-            self.y += self.velocity[1]*dt 
+            self.velocity[1] += g*(dt*factor_y)
+            self.x += self.velocity[0]*(dt*factor_y)*factor_x
+            self.y += (self.velocity[1]*dt*factor_y)*factor_y
 
 
 

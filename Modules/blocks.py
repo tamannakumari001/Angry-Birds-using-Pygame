@@ -2,16 +2,15 @@ import numpy as np
 import pygame
 
 block_types=['all','wood','stone','ice'] #List of possible blocks
-block_side=60
 
 class block:
-    def __init__(self, type, pos_in_block_set, bs_pos, screen: pygame.Surface,side,health):
+    def __init__(self, type, pos_in_block_set, bs_pos, screen: pygame.Surface,side,health,block_side):
         self.type = block_types[type]
         self.side = block_side
         self.health = health
         self.screen = screen
-        self.side = side
-        self.pos = (bs_pos[0] + block_side*pos_in_block_set[0]*(-1)**self.side,bs_pos[1] + block_side*pos_in_block_set[1])
+        self.player = side
+        self.pos = (bs_pos[0] + block_side*pos_in_block_set[0]*(-1)**self.player,bs_pos[1] + block_side*pos_in_block_set[1])
         self.rectangle = pygame.Rect(self.pos[0],self.pos[1],block_side,block_side)
         self.color = None
         
@@ -29,7 +28,7 @@ class block:
     def create_block(self):
         self.get_color()
         if(self.health>0):
-            rect_surf = pygame.Surface((block_side,block_side), pygame.SRCALPHA) #the pixel format will include per pixel alpha to induce transparency based on health
+            rect_surf = pygame.Surface((self.side,self.side), pygame.SRCALPHA) #the pixel format will include per pixel alpha to induce transparency based on health
             rect_surf.fill((self.color[0],self.color[1],self.color[2],255*self.health/100))
             self.screen.blit(rect_surf,self.pos)
 
@@ -41,10 +40,10 @@ class block_set:
         self.health = np.array([[100,100,100,100,100],[100,100,100,100,100]])   
         self.screen = screen
 
-    def create_block_set(self,pos,side):
+    def create_block_set(self,pos,side,block_side):
         for i in range(len(self.arr)):
             for j in range (len(self.arr[i])):
-                myblock = block(self.arr[i,j],(i,j),pos,self.screen,side,self.health[i,j])
+                myblock = block(self.arr[i,j],(i,j),pos,self.screen,side,self.health[i,j],block_side)
                 myblock.create_block()
 
     def copy(self):
@@ -56,10 +55,13 @@ class block_set:
     
     
     
-def get_block(pos,side,bs_pos):
-    x_pos = (((pos[0]-bs_pos[0]))//block_side) *((-1)**side) 
-    y_pos = (pos[1] - bs_pos[1])//block_side
-    return (int(x_pos),int(y_pos))
+def get_block(pos,side,bs_pos,block_side):
+    x_pos = int(((pos[0]-bs_pos[0]))//block_side) *((-1)**side) 
+    y_pos = int((pos[1] - bs_pos[1])/block_side)
+    return x_pos,y_pos
+
+
+
 
 
 
