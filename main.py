@@ -1,5 +1,6 @@
 from initialized import *
-import time
+import sys
+
 # import random
 
 
@@ -33,6 +34,7 @@ while True:
                     input0_bool = False
                 elif event.key == pygame.K_BACKSPACE:
                     player0.name = player0.name[:-1]
+
                 else:
                     player0.name += event.unicode
 
@@ -58,113 +60,175 @@ while True:
         play_button.active = True
     if (quit_button.is_clicked()):
         quit_button.active = True
-    if (play_button.active):
 
-
-        if (input0_bool):
-            draw_input(screen,input_player0,"Black", "Player1", font,player0.name,input_box,factor_x,factor_y)
-        else:
-            screen.blit(text_surface_0, text_surface_0_Rect)
-            for index in range(len(player0.birds)):
-                screen.blit(player0.birds[index].surface, (width/2 -(200-100*index)*factor_x,100*factor_y))
-
-
-        if input1_bool:
-            draw_input(screen,input_player1,"Black", "Player2", font,player1.name,input_box,factor_x,factor_y)
-        else:
-            screen.blit(text_surface_1,text_surface_1_Rect)
-            for index in range(len(player1.birds)):
-                screen.blit(player1.birds[index].surface, (width/2 + (160 + 100*index)*factor_x,100*factor_y))
-
-
-        if (not(input0_bool or input1_bool)):
-            both_inputs_done = True
-
-        if (both_inputs_done):
-            if (len(player0.birds)<3):
-                select_birds(player0,red_menu,blue_menu,chuck_menu,bomb_menu,screen,font_menu,red_0,blue_0,chuck_0,bomb_0,factor_y)
-            elif (len(player1.birds)<3):
-                select_birds(player1,red_menu,blue_menu,chuck_menu,bomb_menu,screen,font_menu,red_1,blue_1,chuck_1,bomb_1,factor_y)
+    if (loading_time == 0):
+        for i in range(loaded):
+            pygame.mixer.music.play(-1)
+            loaded -= 1
+        if (play_button.active):
+            if (input0_bool):
+                draw_input(screen,input_player0,"Black", "Player1", font,player0.name,input_box,factor_x,factor_y)
             else:
-                game_start = True
-                if (player0.active):
-                    b = player0.birds[player0.current_bird]
-                    b_Rect = b.surface.get_rect(center = sling1_center)
-                    b.isactive = True
-                    target_bs = bs_1_rect
-                    target_pos = bs_1_pos
-                    target = player1
-                    target_side = 1
-                    active_player = player0
+                screen.blit(text_surface_0, text_surface_0_Rect)
+                for index in range(len(player0.birds)):
+                    screen.blit(player0.birds[index].surface, (width/2 -(200+100*index)*factor_x,100*factor_y))
 
-                elif (player1.active):
-                    b = player1.birds[player1.current_bird]
-                    b_Rect = b.surface.get_rect(center = sling1_center)
-                    b.isactive = True
-                    target_bs = bs_0_rect
-                    target_pos = bs_0_pos
-                    target = player0
-                    target_side = 0
-                    active_player = player1
 
-        if (player0.score == 0 or player1.score == 0):
-            game_over = True
-            game_start = False
-            if (player1.score > player0.score):
-                winner = player1
+            if input1_bool:
+                draw_input(screen,input_player1,"Black", "Player2", font,player1.name,input_box,factor_x,factor_y)
             else:
-                winner = player0
+                screen.blit(text_surface_1,text_surface_1_Rect)
+                for index in range(len(player1.birds)):
+                    screen.blit(player1.birds[index].surface, (width/2 + (160 + 100*index)*factor_x,100*factor_y))
+
+
+            if (not(input0_bool or input1_bool)):
+                both_inputs_done = True
+
+            if (both_inputs_done):
+                if (len(player0.birds)<3):
+                    select_birds(player0,red_menu,blue_menu,chuck_menu,bomb_menu,screen,font_menu,red_0,blue_0,chuck_0,bomb_0,factor_y)
+                elif (len(player1.birds)<3):
+                    select_birds(player1,red_menu,blue_menu,chuck_menu,bomb_menu,screen,font_menu,red_1,blue_1,chuck_1,bomb_1,factor_y)
+                else:
+                    game_start = True
+                    if (player0.active):
+                        b = player0.birds[player0.current_bird]
+                        b_Rect = b.surface.get_rect(center = sling1_center)
+                        b.isactive = True
+                        target_bs = bs_1_rect
+                        target_pos = bs_1_pos
+                        target = player1
+                        target_side = 1
+                        active_player = player0
+                        blueA = blueA_0
+                        blueB = blueB_0
+
+                    elif (player1.active):
+                        b = player1.birds[player1.current_bird]
+                        b_Rect = b.surface.get_rect(center = sling1_center)
+                        b.isactive = True
+                        target_bs = bs_0_rect
+                        target_pos = bs_0_pos
+                        target = player0
+                        target_side = 0
+                        active_player = player1
+                        blueA = blueA_1
+                        blueB = blueB_1
+
+            if (player0.score == 0 or player1.score == 0):
+                game_over = True
+                game_start = False
+                if (player1.score > player0.score):
+                    winner = player1
+                else:
+                    winner = player0
 
 
 
-        bs0.create_block_set(bs_0_pos,0,block_side)        
-        bs1.create_block_set(bs_1_pos,1,block_side)
-        screen.blit(sling0,sling0_rect)
-        screen.blit(sling1,sling1_rect)
+            bs0.create_block_set(bs_0_pos,0,block_side)        
+            bs1.create_block_set(bs_1_pos,1,block_side)
+            screen.blit(sling0,sling0_rect)
+            screen.blit(sling1,sling1_rect)
 
-        if game_start:
+            if game_start:
+                # playing(font,block_side,b,b_Rect,screen,mouse,active_player,target_side,factor_x,factor_y,target_bs,height,width,bomb_ability_active,max_bomb_usage,target,target_pos,player1,player0,text_surface_1,text_surface_0)
+                if (b.isactive):
+                    b_Rect.center = (b.x,b.y)
+                    screen.blit(b.surface,b_Rect)
+                    if triplify_bool:
+                        screen.blit(blueA.surface,blueA_rect)
+                        screen.blit(blueB.surface,blueB_rect)
+                        blueA_rect.center = (blueA.x,blueA.y)
+                        blueB_rect.center = (blueB.x,blueB.y)
 
-            if (b.isactive):
-                b_Rect.center = (b.x,b.y)
-                screen.blit(b.surface,b_Rect)
-                launch_bird(b,b_Rect,mouse,active_player.start,target_side)
-                if b.just_launched:
-                    release_time =time.time()
-                    b.just_launched = False
-                if (b.being_dragged):
-                    show_trajectory(b,active_player.start,5,screen,target_side,factor_x,factor_y)
-                if collide_bird(b,target_bs):
-                    damage_done(b,target_side,target_pos,target,active_player,block_side)
-                if b.y > height or b.x < 0 or b.x > width : 
-                    b.isactive = False
-                    b.ready = False
-                    b.being_dragged = False
-                    active_player.deactivate_player()
-                    target.activate_player()
+                        # screen.blit(pygame.transform.scale(blueA.surface,(player_bird_size/1.25,player_bird_size/1.25)),(b_Rect.x,b_Rect.y+block_side))
+                        # screen.blit(pygame.transform.scale(blueB.surface,(player_bird_size/1.25,player_bird_size/1.25)),(b_Rect.x,b_Rect.y-block_side))
+                        
+                    launch_bird(b,b_Rect,mouse,active_player.start,target_side)
+                    if (b.being_dragged):
+                        show_trajectory(b,active_player.start,10,screen,target_side,factor_x,factor_y)
+                        show_stretch(b,active_player.start,screen)
+
+                    if collide_bird(b,target_bs):
+
+                        # if triplify_bool:
+                        #     print("inside")
+                        #     b.y += block_side
+                        #     if collide_bird(b,target_bs):
+                        #         damage_done_by_dupli(b,target_side,target_pos,target,block_side)
+                        #     b.y -= 2*block_side
+                        #     if collide_bird(b,target_bs):
+                        #         damage_done_by_dupli(b,target_side,target_pos,target,block_side)
+                        #     triplify_bool = False
+                        #     b.y += block_side
+                        if not bomb_ability_active:
+                            damage_done(b,target_side,target_pos,target,active_player,block_side,Prev_cords)
+
+                        else:
+                            bomb_ability(b,target,active_player)
+                            max_bomb_usage -= 1
+                            bomb_ability_active = False
+                    Prev_cords = (b.x,b.y)
+                    if b.y > height or b.x < 0 or b.x > width : 
+                        b.isactive = False
+                        b.ready = False
+                        b.being_dragged = False
+                        active_player.deactivate_player()
+                        target.activate_player()
+                        if triplify_bool:
+                            triplify_bool = False
+                        
+
+                    score_1 = font.render(str(player1.score), True, "Black")
+                    score_1_Rect = text_surface_1.get_rect(center = (3*width/4,height/4+50*factor_y))
+                    score_0 = font.render(str(player0.score), True, "Black")
+                    score_0_Rect = text_surface_0.get_rect(center = (width/4,height/4+50*factor_y))
+                    screen.blit(score_1, score_1_Rect)  
+                    screen.blit(score_0, score_0_Rect)
 
 
+                if b.ready:
+                    if triplify_bool:
+                        blueA.update(factor_x,factor_y)
+                        blueB.update(factor_x,factor_y)
 
-                    
+                    b.update(factor_x,factor_y)
+                    if pygame.mouse.get_pressed()[2]:
+                        if b.type == 2 and max_bomb_usage>0:
+                            bomb_ability_active = True
+                        if b.type==1:    
+                            speed_ability(b)
+                        if b.type == 3:
+                            triplify_bool = True
+                            (blueA.x,blueA.y) = (b.x,b.y + block_side)
+                            (blueB.x,blueB.y) = (b.x,b.y - block_side)
+                            blueA.velocity = b.velocity.copy()
+                            blueB.velocity = b.velocity.copy()
+                            blueA.isactive = blueB.isactive = True
+                            blueA_rect = blueA.surface.get_rect(center = (blueA.x,blueA.y))
+                            blueB_rect = blueB.surface.get_rect(center = (blueB.x,blueB.y))
 
-                score_1 = font.render(str(player1.score), True, "Black")
-                score_1_Rect = text_surface_1.get_rect(center = (3*width/4,height/4+50))
-                score_0 = font.render(str(player0.score), True, "Black")
-                score_0_Rect = text_surface_0.get_rect(center = (width/4,height/4+50))
-
-
-                screen.blit(score_1, score_1_Rect)  
-                screen.blit(score_0, score_0_Rect)
-
-
-            if b.ready:
-                b.update(factor_x,factor_y)
+        else:
+            screen.blit(logo_surf,logo_rect)
+            play_button.display()
     else:
-        play_button.display()
+        screen.blit(loading_screen_surf,(0,0))
+        loading_time -= 1
+        pygame.draw.line(screen,"White",(width/4,height/4),(3*width/4 - (loading_time**2/900)*factor_x,height/4),int(50*factor_y))
+
     
     if game_over:
         screen.blit(score_1, score_1_Rect)  
         screen.blit(score_0, score_0_Rect)
-        winner_display(winner,screen,font_winner,factor_x)
+        screen.blit(game_over_surface,(0,0))
+
+        if (winner_timer < 0):
+            winner_display(winner,screen,font_winner,factor_x)
+        else:
+            screen.blit(game_over_logo,game_over_logo_rect)
+            winner_timer-=3
+
  
  
     if (quit_button.active):
@@ -174,6 +238,6 @@ while True:
         quit_button.display()
 
     pygame.display.update()
-    clock.tick(6000)
+    clock.tick(1200)
 
 

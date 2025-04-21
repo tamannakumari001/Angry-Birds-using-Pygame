@@ -1,16 +1,25 @@
 # import os
-import sys
 # import math
+import random
 import pygame
 from working import *
 from Modules import blocks,birds,Buttons,players
 
 
 
+#you have to work on collisions. We already wrote functions which give us the side of collision.
 
 
 pygame.init()
-screen=pygame.display.set_mode((1280,720))
+pygame.mixer.init()
+screen=pygame.display.set_mode((1280,720),pygame.FULLSCREEN)
+
+#load audio
+pygame.mixer.music.load('Resources/audio/theme_song.wav')
+loaded = 1
+dA = dB = dC= True
+Prev_cords = 0
+
 clock = pygame.time.Clock()
 width , height = screen.get_size()
 factor_x = width/1280
@@ -22,9 +31,11 @@ menu_bird_size = 80 * factor_y
 background = pygame.transform.scale(pygame.image.load('Resources/background.png').convert_alpha(),(width,height))
 bs1 = blocks.block_set(screen,)
 bs0 = bs1.copy()
+print(bs0.cords)
 block_side=60*factor_y
 bs_0_pos = (100*factor_x,400*factor_y)
-bs_1_pos = (width - (100)*factor_x, 400*factor_y)
+bs_1_pos = (width - block_side-(100)*factor_x, 400*factor_y)
+print(bs_1_pos)
 bs_0_rect = pygame.Rect(bs_0_pos[0],bs_0_pos[1],2*block_side,5*block_side)
 bs_1_rect = pygame.Rect(bs_1_pos[0]-block_side,bs_1_pos[1],2*block_side,5*block_side)
 sling0_pos = (300*factor_x,710*factor_y)
@@ -42,20 +53,26 @@ font_winner = pygame.font.Font("Resources/Fonts/angrybirds-regular.ttf",int(150*
 birds_Selected_0 = birds_Selected_1= False
 game_start = False
 game_over = False
-
+game_over_surface = pygame.Surface((width,height),pygame.SRCALPHA)
+game_over_surface.fill((0,0,0,185))
+game_over_logo = pygame.image.load("Resources/game_over.png")
+game_over_logo_rect = game_over_logo.get_rect(center = (width/2,height/2))
 #BIRDS
 #player 0 birds
 red_0=birds.red(player_bird_size,player_bird_size,sling0_center[0],sling0_center[1],0)
 chuck_0=birds.chuck(player_bird_size,player_bird_size,sling0_center[0],sling0_center[1],0)
 bomb_0=birds.bomb(player_bird_size,player_bird_size,sling0_center[0],sling0_center[1],0)
 blue_0=birds.blue(player_bird_size,player_bird_size,sling0_center[0],sling0_center[1],0)
+blueA_0=birds.blue(player_bird_size,player_bird_size,sling0_center[0],sling0_center[1],0)
+blueB_0=birds.blue(player_bird_size,player_bird_size,sling0_center[0],sling0_center[1],0)
 
 #player 1 birds
 red_1=birds.red(player_bird_size,player_bird_size,sling1_center[0],sling1_center[1],1)
 chuck_1=birds.chuck(player_bird_size,player_bird_size,sling1_center[0],sling1_center[1],1)
 bomb_1=birds.bomb(player_bird_size,player_bird_size,sling1_center[0],sling1_center[1],1)
 blue_1=birds.blue(player_bird_size,player_bird_size,sling1_center[0],sling1_center[1],1)
-
+blueA_1=birds.blue(player_bird_size,player_bird_size,sling1_center[0],sling1_center[1],1)
+blueB_1=birds.blue(player_bird_size,player_bird_size,sling1_center[0],sling1_center[1],1)
 #Menu_button_birds
 font_menu = pygame.font.Font("Resources/Fonts/angrybirds-regular.ttf",50)
 red_m = birds.red(menu_bird_size,menu_bird_size,width/2,3*height/8,1)
@@ -67,17 +84,24 @@ bomb_menu = Buttons.Button("BOMB",(bomb_m.x,bomb_m.y),screen,bomb_m.surface)
 blue_menu = Buttons.Button("BLUE",(blue_m.x,blue_m.y),screen,blue_m.surface)
 chuck_menu = Buttons.Button("CHUCK",(chuck_m.x,chuck_m.y),screen,chuck_m.surface)
 
-
+bomb_ability_active = False
+triplify_bool = False
+max_bomb_usage = random.randint(0,5)
 
 
 #PLAY BUTTON
 buttons = pygame.image.load('Resources/selected-buttons.png').convert_alpha()
 rect = pygame.Rect(265,0,230,230)
 play_button_image = buttons.subsurface(rect).copy()
-play_button = Buttons.Button("Play", (width/2,height/2), screen, play_button_image)
+play_button = Buttons.Button("Play", (width/2,height/2.2), screen, play_button_image,factor_x,factor_y)
 rect = pygame.Rect(150,112,120,120)
 quit_button_image = buttons.subsurface(rect).copy()
 quit_button = Buttons.Button("Quit", (width - 120, 100), screen, quit_button_image)
+logo_surf = pygame.image.load("Resources/logo.png")
+logo_surf = pygame.transform.scale(logo_surf,(factor_x*logo_surf.get_width()/0.8,factor_y*logo_surf.get_height()/0.8))
+logo_rect = logo_surf.get_rect(center = (width/2,3*height/5))
+loading_screen_surf = pygame.transform.scale(pygame.image.load('Resources/loading_screen.jpg'),(width,height))
+loading_time = 600
 
 #PLAYER_NAME_INPUT
 input_player0 = pygame.Rect(width/2 - input_box_x/2, height/2 - 20*factor_y - input_box_y, input_box_x, input_box_y )
@@ -90,6 +114,7 @@ player0 = players.player("",bs0,sling0_center)
 player1 = players.player("",bs1,sling1_center)
 player0.activate_player()
 
+winner_timer = 1200
 
 
 

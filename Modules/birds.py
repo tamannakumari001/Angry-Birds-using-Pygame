@@ -1,6 +1,6 @@
 import pygame
 g=561
-dt = (1/600)
+dt = (1/300)
 all_type = 0
 wood_type = 1
 stone_type = 2
@@ -17,7 +17,6 @@ class bird():
         self.y = y
         self.isactive = False
         self.ready = False
-        self.just_launched = False
         self.velocity = [0,0]
         self.being_dragged = False
 
@@ -26,6 +25,8 @@ class bird():
             self.velocity[1] += g*(dt*factor_y)
             self.x += self.velocity[0]*(dt*factor_y)*factor_x
             self.y += (self.velocity[1]*dt*factor_y)*factor_y
+
+
 
 
 
@@ -46,14 +47,17 @@ class bird():
 class red(bird):
     def __init__(self,width,height,x,y,side):
         bird.__init__(self,width,height,x,y)
+        self.side = side
         self.surface1 = pygame.image.load('Resources/red.png').convert_alpha()
         self.surface = pygame.transform.flip((pygame.transform.scale(self.surface1, (self.width,self.height))),flip_x=side,flip_y=False)
         self.type = all_type
 
 
+
 class blue(bird):
     def __init__(self,width,height,x,y,side):
         bird.__init__(self,width,height,x,y)
+        self.side = side
         self.surface1 = pygame.image.load('Resources/small_blue.png').convert_alpha()
         self.surface = pygame.transform.flip((pygame.transform.scale(self.surface1, (self.width,self.height))),flip_x=side,flip_y=False)
         self.type = ice_type
@@ -61,6 +65,7 @@ class blue(bird):
 
 class bomb(bird):
     def __init__(self,width,height,x,y,side):
+        self.side = side
         bird.__init__(self,width,height,x,y)
         self.surface1 = pygame.image.load('Resources/bomb.png').convert_alpha()
         self.surface = pygame.transform.flip((pygame.transform.scale(self.surface1, (self.width,self.height))),flip_x=side,flip_y=False)
@@ -70,9 +75,11 @@ class bomb(bird):
 class chuck(bird):
     def __init__(self,width,height,x,y,side):
         bird.__init__(self,width,height,x,y)
+        self.side = side
         self.surface1 = pygame.image.load('Resources/fast_yellow.png').convert_alpha()
         self.surface = pygame.transform.flip((pygame.transform.scale(self.surface1, (self.width,self.height))),flip_x=side,flip_y=False)
         self.type = wood_type
+
 
 
 
