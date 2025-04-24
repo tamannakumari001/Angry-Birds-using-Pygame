@@ -26,7 +26,7 @@ class block:
         self.health = health
         self.screen = screen
         self.player = side
-        self.pos = (bs_pos[0] + block_side*pos_in_block_set[0]*(-1)**self.player,bs_pos[1] + block_side*pos_in_block_set[1])
+        self.pos = (bs_pos[0] + (block_side)*pos_in_block_set[0]*(-1)**self.player,bs_pos[1] + (block_side)*pos_in_block_set[1])
         self.rectangle = pygame.Rect(self.pos[0],self.pos[1],block_side,block_side)
         self.color = None
         

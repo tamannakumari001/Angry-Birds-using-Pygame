@@ -1,6 +1,6 @@
 import pygame
 g=561
-dt = (1/300)
+dt = (1/150)
 all_type = 0
 wood_type = 1
 stone_type = 2
@@ -26,19 +26,6 @@ class bird():
             self.x += self.velocity[0]*(dt*factor_y)*factor_x
             self.y += (self.velocity[1]*dt*factor_y)*factor_y
 
-
-
-
-
-
-    
-        
-
-
-
-
-
-    
 
 
  #BIRDS
@@ -80,7 +67,13 @@ class chuck(bird):
         self.surface = pygame.transform.flip((pygame.transform.scale(self.surface1, (self.width,self.height))),flip_x=side,flip_y=False)
         self.type = wood_type
 
-
+class big_red(bird):
+    def __init__(self,width,height,x,y,side):
+        bird.__init__(self,width,height,x,y)
+        self.side = side
+        self.surface1 = pygame.image.load('Resources/big_red.png').convert_alpha()
+        self.surface = pygame.transform.flip((pygame.transform.scale(self.surface1, (self.width,self.height))),flip_x=side,flip_y=False)
+        self.type = all_type
 
 
 

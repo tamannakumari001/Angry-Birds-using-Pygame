@@ -1,6 +1,5 @@
 from initialized import *
 import sys
-
 # import random
 
 
@@ -70,16 +69,22 @@ while True:
                 draw_input(screen,input_player0,"Black", "Player1", font,player0.name,input_box,factor_x,factor_y)
             else:
                 screen.blit(text_surface_0, text_surface_0_Rect)
-                for index in range(len(player0.birds)):
-                    screen.blit(player0.birds[index].surface, (width/2 -(200+100*index)*factor_x,100*factor_y))
+                if not red_ability_active:
+                    for index in range(len(player0.birds)):
+                        screen.blit(player0.birds[index].surface, (width/2 -(200+100*index)*factor_x,100*factor_y))
+
 
 
             if input1_bool:
                 draw_input(screen,input_player1,"Black", "Player2", font,player1.name,input_box,factor_x,factor_y)
             else:
                 screen.blit(text_surface_1,text_surface_1_Rect)
-                for index in range(len(player1.birds)):
-                    screen.blit(player1.birds[index].surface, (width/2 + (160 + 100*index)*factor_x,100*factor_y))
+                if not red_ability_active:
+                    for index in range(len(player1.birds)):
+                            
+                        screen.blit(player1.birds[index].surface, (width/2 + (160 + 100*index)*factor_x,100*factor_y))
+                else:
+                    screen.blit(big_red_surface, (width/2 ,100*factor_y))
 
 
             if (not(input0_bool or input1_bool)):
@@ -103,6 +108,7 @@ while True:
                         active_player = player0
                         blueA = blueA_0
                         blueB = blueB_0
+                        big_red_surface = big_Red_0_surf
 
                     elif (player1.active):
                         b = player1.birds[player1.current_bird]
@@ -115,6 +121,7 @@ while True:
                         active_player = player1
                         blueA = blueA_1
                         blueB = blueB_1
+                        big_red_surface = big_Red_1_surf
 
             if (player0.score == 0 or player1.score == 0):
                 game_over = True
@@ -141,14 +148,42 @@ while True:
                         screen.blit(blueB.surface,blueB_rect)
                         blueA_rect.center = (blueA.x,blueA.y)
                         blueB_rect.center = (blueB.x,blueB.y)
-
+                        if collide_bird(blueA,target_bs):
+                            damage_done(blueA,target_side,target_pos,target,active_player,block_side,Prev_cords_A,False)
+                        if collide_bird(blueB,target_bs):
+                            damage_done(blueB,target_side,target_pos,target,active_player,block_side,Prev_cords_B,False)
                         # screen.blit(pygame.transform.scale(blueA.surface,(player_bird_size/1.25,player_bird_size/1.25)),(b_Rect.x,b_Rect.y+block_side))
                         # screen.blit(pygame.transform.scale(blueB.surface,(player_bird_size/1.25,player_bird_size/1.25)),(b_Rect.x,b_Rect.y-block_side))
                         
-                    launch_bird(b,b_Rect,mouse,active_player.start,target_side)
+                    launch_bird(b,b_Rect,mouse,active_player.start,factor_x)
                     if (b.being_dragged):
-                        show_trajectory(b,active_player.start,10,screen,target_side,factor_x,factor_y)
+                        b.x = mouse[0]
+                        b.y = mouse[1]
+                        x_dist = (b.x-active_player.start[0])
+                        y_dist = (b.y-active_player.start[1])
+                        dist = math.sqrt(x_dist**2+y_dist**2)
+                        theta = math.atan2(y_dist,x_dist)
+                        if dist > 100*factor_x:
+                            b.x = active_player.start[0] + 100*factor_x*math.cos(theta)
+                            b.y = active_player.start[1] + 100*factor_x*math.sin(theta)
+                        show_trajectory(b,active_player.start,30,screen,target_side,factor_x,factor_y)
                         show_stretch(b,active_player.start,screen)
+                    
+                    if collide_bird(b,ground_rect):
+                        b.velocity[0] *= 0.7
+                        b.velocity[1] *= -0.7
+                        b.y = ground_rect.y
+                    if triplify_bool:
+                        if collide_bird(blueA,ground_rect):
+                            blueA.velocity[0] *= 0.7
+                            blueA.velocity[1] *= -0.7
+                            blueA.y = ground_rect.y
+                        if collide_bird(blueB,ground_rect):
+                            blueB.velocity[0] *= 0.7
+                            blueB.velocity[1] *= -0.7
+                            blueB.y = ground_rect.y
+
+
 
                     if collide_bird(b,target_bs):
 
@@ -162,14 +197,25 @@ while True:
                         #         damage_done_by_dupli(b,target_side,target_pos,target,block_side)
                         #     triplify_bool = False
                         #     b.y += block_side
-                        if not bomb_ability_active:
-                            damage_done(b,target_side,target_pos,target,active_player,block_side,Prev_cords)
+                        # if not bomb_ability_active:
+                        #     damage_done(b,target_side,target_pos,target,active_player,block_side,Prev_cords,False)
 
-                        else:
+                        if bomb_ability_active:
                             bomb_ability(b,target,active_player)
                             max_bomb_usage -= 1
                             bomb_ability_active = False
+                        elif red_ability_active:
+                            damage_done(b,target_side,target_pos,target,active_player,block_side,Prev_cords,red_ability_active)
+                        else:
+                            damage_done(b,target_side,target_pos,target,active_player,block_side,Prev_cords,False)
+
                     Prev_cords = (b.x,b.y)
+                    if triplify_bool:
+                        Prev_cords_A = (blueA.x,blueA.y)
+                        Prev_cords_B = (blueB.x,blueB.y)
+
+                       
+
                     if b.y > height or b.x < 0 or b.x > width : 
                         b.isactive = False
                         b.ready = False
@@ -178,6 +224,11 @@ while True:
                         target.activate_player()
                         if triplify_bool:
                             triplify_bool = False
+                            can_active_triplify = True
+                        if red_ability_active:
+                            b.surface = OGsurf
+                            red_ability_active  = False
+
                         
 
                     score_1 = font.render(str(player1.score), True, "Black")
@@ -199,15 +250,40 @@ while True:
                             bomb_ability_active = True
                         if b.type==1:    
                             speed_ability(b)
-                        if b.type == 3:
+                        if b.type == 3 and can_active_triplify ==True:
                             triplify_bool = True
-                            (blueA.x,blueA.y) = (b.x,b.y + block_side)
-                            (blueB.x,blueB.y) = (b.x,b.y - block_side)
+                            can_active_triplify = False
+                            (blueA.x,blueA.y) = (b.x,b.y + block_side/2)
+                            (blueB.x,blueB.y) = (b.x,b.y - block_side/2)
                             blueA.velocity = b.velocity.copy()
                             blueB.velocity = b.velocity.copy()
                             blueA.isactive = blueB.isactive = True
                             blueA_rect = blueA.surface.get_rect(center = (blueA.x,blueA.y))
                             blueB_rect = blueB.surface.get_rect(center = (blueB.x,blueB.y))
+                        if b.type == 0 and active_player.max_big_red_active > 0:
+                            active_player.max_big_red_active -= 1
+                            red_ability_active = True
+                            OGsurf = pygame.transform.flip((pygame.transform.scale(b.surface1, (player_bird_size,player_bird_size))),flip_x=not target_side,flip_y=False)
+                            b.surface = big_red_surface
+                    
+                    speed = math.sqrt(b.velocity[0]**2 + b.velocity[1]**2)
+                    if 2.5*factor_x>speed >= 0:
+                        if triplify_bool:
+                            triplify_bool = False
+                            can_active_triplify = True
+
+                        if puff_timer != 0 :
+                            puff_Rect = puff_list[(puff_timer//25)%2].get_rect(center = (b.x,b.y))
+                            screen.blit(puff_list[(puff_timer//25)%2],puff_Rect)
+                            puff_timer -= 3
+                        else:
+                            puff_timer = 102
+                            b.ready = False
+                            b.isactive = False
+                            active_player.deactivate_player()
+                            target.activate_player()
+
+
 
         else:
             screen.blit(logo_surf,logo_rect)

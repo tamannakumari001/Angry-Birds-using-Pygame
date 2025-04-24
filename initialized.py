@@ -15,7 +15,7 @@ pygame.mixer.init()
 screen=pygame.display.set_mode((1280,720),pygame.FULLSCREEN)
 
 #load audio
-pygame.mixer.music.load('Resources/audio/theme_song.wav')
+pygame.mixer.music.load('Resources/audio/theme_song.mp3')
 loaded = 1
 dA = dB = dC= True
 Prev_cords = 0
@@ -31,13 +31,12 @@ menu_bird_size = 80 * factor_y
 background = pygame.transform.scale(pygame.image.load('Resources/background.png').convert_alpha(),(width,height))
 bs1 = blocks.block_set(screen,)
 bs0 = bs1.copy()
-print(bs0.cords)
 block_side=60*factor_y
 bs_0_pos = (100*factor_x,400*factor_y)
 bs_1_pos = (width - block_side-(100)*factor_x, 400*factor_y)
-print(bs_1_pos)
 bs_0_rect = pygame.Rect(bs_0_pos[0],bs_0_pos[1],2*block_side,5*block_side)
 bs_1_rect = pygame.Rect(bs_1_pos[0]-block_side,bs_1_pos[1],2*block_side,5*block_side)
+ground_rect = pygame.Rect(0,675*factor_y,width,height-675*factor_y)
 sling0_pos = (300*factor_x,710*factor_y)
 sling1_pos = (width-(300)*factor_x,710*factor_y)
 sling0_center= (290*factor_x,530*factor_y)
@@ -58,6 +57,7 @@ game_over_surface.fill((0,0,0,185))
 game_over_logo = pygame.image.load("Resources/game_over.png")
 game_over_logo_rect = game_over_logo.get_rect(center = (width/2,height/2))
 #BIRDS
+big_Red_surf = pygame.image.load("Resources/big_red.png")
 #player 0 birds
 red_0=birds.red(player_bird_size,player_bird_size,sling0_center[0],sling0_center[1],0)
 chuck_0=birds.chuck(player_bird_size,player_bird_size,sling0_center[0],sling0_center[1],0)
@@ -65,7 +65,7 @@ bomb_0=birds.bomb(player_bird_size,player_bird_size,sling0_center[0],sling0_cent
 blue_0=birds.blue(player_bird_size,player_bird_size,sling0_center[0],sling0_center[1],0)
 blueA_0=birds.blue(player_bird_size,player_bird_size,sling0_center[0],sling0_center[1],0)
 blueB_0=birds.blue(player_bird_size,player_bird_size,sling0_center[0],sling0_center[1],0)
-
+big_Red_0_surf = pygame.transform.flip((pygame.transform.scale(big_Red_surf, (player_bird_size*2,player_bird_size*2))),flip_x=0,flip_y=False)
 #player 1 birds
 red_1=birds.red(player_bird_size,player_bird_size,sling1_center[0],sling1_center[1],1)
 chuck_1=birds.chuck(player_bird_size,player_bird_size,sling1_center[0],sling1_center[1],1)
@@ -73,6 +73,7 @@ bomb_1=birds.bomb(player_bird_size,player_bird_size,sling1_center[0],sling1_cent
 blue_1=birds.blue(player_bird_size,player_bird_size,sling1_center[0],sling1_center[1],1)
 blueA_1=birds.blue(player_bird_size,player_bird_size,sling1_center[0],sling1_center[1],1)
 blueB_1=birds.blue(player_bird_size,player_bird_size,sling1_center[0],sling1_center[1],1)
+big_Red_1_surf = pygame.transform.flip((pygame.transform.scale(big_Red_surf, (player_bird_size*2,player_bird_size*2))),flip_x=1,flip_y=False)
 #Menu_button_birds
 font_menu = pygame.font.Font("Resources/Fonts/angrybirds-regular.ttf",50)
 red_m = birds.red(menu_bird_size,menu_bird_size,width/2,3*height/8,1)
@@ -87,6 +88,8 @@ chuck_menu = Buttons.Button("CHUCK",(chuck_m.x,chuck_m.y),screen,chuck_m.surface
 bomb_ability_active = False
 triplify_bool = False
 max_bomb_usage = random.randint(0,5)
+red_ability_active = False
+can_active_triplify = True
 
 
 #PLAY BUTTON
@@ -115,7 +118,14 @@ player1 = players.player("",bs1,sling1_center)
 player0.activate_player()
 
 winner_timer = 1200
+puff_timer = 102
 
+#puff_animation
+puff_list = []
+for i in range(2):
+    puff_str = f"Resources/puff_Explode ({i}).png"
+    puff_surf = pygame.transform.scale((pygame.image.load(puff_str)),(player_bird_size*2,player_bird_size*2))
+    puff_list.append(puff_surf)
 
 
 

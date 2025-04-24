@@ -2,33 +2,32 @@ import pygame
 import math
 from Modules import birds,blocks,players,Buttons
 
-power_factor = 5
+power_factor = 5*2.25
 t = 1
 crown_fact = 1
 
 
 
-def launch_bird(object : birds.bird, rect : pygame.Rect, mouse_pos, sling_pos,side):
+def launch_bird(object : birds.bird, rect : pygame.Rect, mouse_pos, sling_pos,factor):
     if rect.collidepoint(mouse_pos):
         if(pygame.mouse.get_pressed()[0]):
             object.being_dragged = True
-            object.x = mouse_pos[0]
-            object.y = mouse_pos[1]
+    if object.being_dragged:
         if(pygame.mouse.get_just_released()[0]):
             object.ready = True
-            object.velocity[0] = min(abs(sling_pos[0] - object.x)*power_factor,1200)*(-1)**(side-1)
-            object.velocity[1] = min((sling_pos[1] - object.y)*power_factor,1200)
+            object.velocity[0] = (sling_pos[0] - object.x)*power_factor/factor
+            object.velocity[1] = (sling_pos[1] - object.y)*power_factor/factor
             object.being_dragged = False
 
 def show_trajectory(object : birds.bird,sling_pos,number,screen : pygame.Surface,side,factor_x,factor_y):
-    u = min(abs(sling_pos[0] - object.x)*power_factor,1500)*(-1)**(side-1)
-    v = min((sling_pos[1] - object.y)*power_factor,1500)
+    u = (sling_pos[0] - object.x)*power_factor/factor_x
+    v = (sling_pos[1] - object.y)*power_factor/factor_x
     for i in range(number):
-        i = i/number
+        i = 2*i/number
         x = object.x + u*i*factor_x
         y = object.y + (v*i + 0.5*birds.g*i*i)*factor_y
 
-        if ((-1)**(side-1)*x<(-1)**(side-1)*(3*screen.get_width()/5 + (side-1)*screen.get_width()/5)):
+        if ((-1)**(side-1)*x<(-1)**(side-1)*(3*screen.get_width()/4 + (side-1)*screen.get_width()/2)):
             pygame.draw.circle(screen,"Black", (x,y),10)
 
 def show_stretch(b : birds.bird, start,screen : pygame.Surface):
@@ -51,18 +50,31 @@ def show_bird_menu(b1 : Buttons.Button,b2:Buttons.Button,b3:Buttons.Button,b4:Bu
     b3.display()
     b4.display()
 
-def bounce_back(bird : birds.bird , x1,x2,y1,y2,inside,outside):
+def score_update(player_target : players.player, dec , i, j):
+    if player_target.bs.health[i,j] > 0:
+        player_target.bs.health[i,j] -= dec
+        player_target.score = player_target.score - dec
+        if player_target.bs.health[i,j] < 0:
+            player_target.score -= player_target.bs.health[i,j]
+
+
+def bounce_back(bird : birds.bird , x1,x2,y1,y2,inside,outside,block_side):
     poc = point_of_contact(x1,x2,y1,y2,inside,outside)
+    # sign = (-1)**target_side
+    # i = block_index[0]
+    # j = block_index[1]
+    # if block_index[1]>0 and player_target.bs.health[i,j-1] >0 and poc[1] == y1:
+
     bird.x = poc[0]
     bird.y = poc[1]
-    if poc[0] == x1 or poc[0] == x2 :
+    if poc[0] == x1 or poc[0]==x2 :
         bird.velocity[0] *= -0.5
-    else : 
+    if poc[1] == y1 or poc[1]==y2 :
         bird.velocity[1] *= -0.5
         
 
 
-def damage_done(bird : birds.bird, done_to_side,bs_pos,player_target: players.player, player_play:players.player,block_side,prev_cords):
+def damage_done(bird : birds.bird, done_to_side,bs_pos,player_target: players.player, player_play:players.player,block_side,prev_cords,bool):
     # damage_done_by_dupli(bird,done_to_side,bs_pos,player_target,block_side)
     block_index = blocks.get_block((bird.x,bird.y),done_to_side,bs_pos,block_side)
     if (player_target.bs.health[block_index[0],block_index[1]])>0:
@@ -70,22 +82,34 @@ def damage_done(bird : birds.bird, done_to_side,bs_pos,player_target: players.pl
         # bird.ready = False
         speed = (bird.velocity[0]**2 + bird.velocity[1]**2)**0.5
         if (player_target.bs.arr[block_index[0],block_index[1]] == bird.type):
-            dec = int(50*speed/1500)
+            dec = int(100*speed/1500)
         elif bird.type == 0:
-            dec = int(30*speed/1500)
+            dec = int(60*speed/1500)
         else:
-            dec = int(15*speed/1500)
-        player_target.bs.health[block_index[0],block_index[1]] -= dec
-        player_target.score = player_target.score - dec
-        if player_target.bs.health[block_index[0],block_index[1]] < 0:
-            player_target.score -= player_target.bs.health[block_index[0],block_index[1]]
-        x1 = player_target.bs.cords[5*block_index[0] + block_index[1]][0]
-        y1 = player_target.bs.cords[5*block_index[0] + block_index[1]][1]
-        x2 = x1+block_side
-        y2 = y1+block_side
-        print(x1,x2,y1,y2,prev_cords,bird.x,bird.y)
+            dec = int(30*speed/1500)
 
-        bounce_back(bird,x1,x2,y1,y2,(bird.x,bird.y),prev_cords)
+        if not bool:
+            x1 = player_target.bs.cords[5*block_index[0] + block_index[1]][0]
+            y1 = player_target.bs.cords[5*block_index[0] + block_index[1]][1]
+            x2 = x1+block_side
+            y2 = y1+block_side
+            # print(x1,x2,y1,y2,prev_cords,bird.x,bird.y)
+
+            bounce_back(bird,x1,x2,y1,y2,(bird.x,bird.y),prev_cords,block_side)
+        else:
+            dec = 100
+            if block_index[1]!=0 and block_index[1]!=4:
+                score_update(player_target,50,block_index[0],block_index[1]-1)
+                score_update(player_target,50,block_index[0],block_index[1]+1)
+
+        score_update(player_target,dec,block_index[0],block_index[1])
+
+
+        # player_target.bs.health[block_index[0],block_index[1]] -= dec
+        # player_target.score = player_target.score - dec
+        # if player_target.bs.health[block_index[0],block_index[1]] < 0:
+        #     player_target.score -= player_target.bs.health[block_index[0],block_index[1]]
+
 
         
         # if blocks.get_block((bird.x-(block_side)*(-1)**done_to_side,bird.y),done_to_side,bs_pos,block_side)[0] == block_index[0]-1:
@@ -151,21 +175,21 @@ def bomb_ability(bird : birds.bird, target: players.player, active_player : play
     active_player.deactivate_player()
     target.activate_player()
 
-def damage_done_by_dupli(bird : birds.bird, done_to_side,bs_pos,player_target: players.player, block_side):
-    block_index = blocks.get_block((bird.x,bird.y),done_to_side,bs_pos,block_side)
-    if (player_target.bs.health[block_index[0],block_index[1]])>0:
-        bird.isactive = False
-        speed = (bird.velocity[0]**2 + bird.velocity[1]**2)**0.5
-        if (player_target.bs.arr[block_index[0],block_index[1]] == bird.type):
-            dec = int(50*speed/1500)
-        elif bird.type == 0:
-            dec = int(30*speed/1500)
-        else:
-            dec = int(15*speed/1500)
-        player_target.bs.health[block_index[0],block_index[1]] -= dec
-        player_target.score = player_target.score - dec
-        if player_target.bs.health[block_index[0],block_index[1]] < 0:
-            player_target.score -= player_target.bs.health[block_index[0],block_index[1]]
+# def damage_done_by_dupli(bird : birds.bird, done_to_side,bs_pos,player_target: players.player, block_side):
+#     block_index = blocks.get_block((bird.x,bird.y),done_to_side,bs_pos,block_side)
+#     if (player_target.bs.health[block_index[0],block_index[1]])>0:
+#         bird.isactive = False
+#         speed = (bird.velocity[0]**2 + bird.velocity[1]**2)**0.5
+#         if (player_target.bs.arr[block_index[0],block_index[1]] == bird.type):
+#             dec = int(50*speed/1500)
+#         elif bird.type == 0:
+#             dec = int(30*speed/1500)
+#         else:
+#             dec = int(15*speed/1500)
+#         player_target.bs.health[block_index[0],block_index[1]] -= dec
+#         player_target.score = player_target.score - dec
+#         if player_target.bs.health[block_index[0],block_index[1]] < 0:
+#             player_target.score -= player_target.bs.health[block_index[0],block_index[1]]
 
 
 
@@ -208,8 +232,14 @@ def damage_done_by_dupli(bird : birds.bird, done_to_side,bs_pos,player_target: p
 #         screen.blit(score_1, score_1_Rect)  
 #         screen.blit(score_0, score_0_Rect)
 
+def in_between(x,bound1, bound2):
+    return bound1 <= x <= bound2 or bound2 <= x <= bound1
+
 def point_of_contact(x1,x2,y1,y2,inside,outside):
-    slope = (outside[1] - inside[1])/(outside[0] - inside[0])
+    if inside[0] != outside[0]:
+        slope = (outside[1] - inside[1])/(outside[0] - inside[0])
+    else:
+        slope = 1e7
     constant = inside[1] - slope*inside[0]
     if abs(outside[0] - x1) < abs(outside[0] - x2):
         closer_x = x1
@@ -223,12 +253,15 @@ def point_of_contact(x1,x2,y1,y2,inside,outside):
     Y = slope*closer_x + constant
     X = (closer_y - constant)/slope
 
-    if (y2>=Y>=y1):
+    if in_between(Y,inside[1],outside[1]):
         return (closer_x,Y)
 
-    if (x2>=X>=x1):
+    if in_between(X,inside[0],outside[0]):
         return (X,closer_y)
+    return (closer_x,closer_y)
 
+def ground_collision():
+    pass
             
 
 

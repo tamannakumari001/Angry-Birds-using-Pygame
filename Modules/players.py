@@ -9,6 +9,7 @@ class player:
         self.current_bird = 2
         self.bs = block_Set
         self.start = sling
+        self.max_big_red_active = 1
 
     def activate_player(self):
         self.active = True
