@@ -5,7 +5,7 @@ import sys
 
 while True:
         
-    screen.blit(background,(0,0))
+    screen.blit(backgrounds[current_bg],(0,0))
     pygame.display.set_caption('Angry Birds')
 
     events=pygame.event.get()
@@ -55,16 +55,26 @@ while True:
         
 
     mouse = pygame.mouse.get_pos()
+    current_time = pygame.time.get_ticks()/1000
     if (play_button.is_clicked()):
         play_button.active = True
     if (quit_button.is_clicked()):
         quit_button.active = True
 
     if (loading_time == 0):
+        current_bg = 1
         for i in range(loaded):
             pygame.mixer.music.play(-1)
             loaded -= 1
         if (play_button.active):
+            current_bg = 2
+
+
+            bs0.create_block_set(bs_0_pos,0,block_side)        
+            bs1.create_block_set(bs_1_pos,1,block_side)
+            screen.blit(sling0,sling0_rect)
+            screen.blit(sling1,sling1_rect)
+
             if (input0_bool):
                 draw_input(screen,input_player0,"Black", "Player1", font,player0.name,input_box,factor_x,factor_y)
             else:
@@ -92,9 +102,9 @@ while True:
 
             if (both_inputs_done):
                 if (len(player0.birds)<3):
-                    select_birds(player0,red_menu,blue_menu,chuck_menu,bomb_menu,screen,font_menu,red_0,blue_0,chuck_0,bomb_0,factor_y)
+                    select_birds(player0,red_menu,blue_menu,chuck_menu,bomb_menu,screen,font_menu,red_0,blue_0,chuck_0,bomb_0,factor_y,bird_menu)
                 elif (len(player1.birds)<3):
-                    select_birds(player1,red_menu,blue_menu,chuck_menu,bomb_menu,screen,font_menu,red_1,blue_1,chuck_1,bomb_1,factor_y)
+                    select_birds(player1,red_menu,blue_menu,chuck_menu,bomb_menu,screen,font_menu,red_1,blue_1,chuck_1,bomb_1,factor_y,bird_menu)
                 else:
                     game_start = True
                     if (player0.active):
@@ -133,101 +143,114 @@ while True:
 
 
 
-            bs0.create_block_set(bs_0_pos,0,block_side)        
-            bs1.create_block_set(bs_1_pos,1,block_side)
-            screen.blit(sling0,sling0_rect)
-            screen.blit(sling1,sling1_rect)
-
             if game_start:
+                if not pause_button.active:
+                    pause_button.display()
+                else:
+                    resume_button.display()
+                if pause_button.is_clicked():
+                    if pause_button.active:
+                        pause_button.play_button_sound()
+                    pause_button.active = not pause_button.active
+                if not music_is_paused:
+                    pygame.mixer.music.pause()
+                    music_is_paused = True
+
                 # playing(font,block_side,b,b_Rect,screen,mouse,active_player,target_side,factor_x,factor_y,target_bs,height,width,bomb_ability_active,max_bomb_usage,target,target_pos,player1,player0,text_surface_1,text_surface_0)
                 if (b.isactive):
                     b_Rect.center = (b.x,b.y)
-                    screen.blit(b.surface,b_Rect)
                     if triplify_bool:
                         screen.blit(blueA.surface,blueA_rect)
                         screen.blit(blueB.surface,blueB_rect)
-                        blueA_rect.center = (blueA.x,blueA.y)
-                        blueB_rect.center = (blueB.x,blueB.y)
-                        if collide_bird(blueA,target_bs):
-                            damage_done(blueA,target_side,target_pos,target,active_player,block_side,Prev_cords_A,False)
-                        if collide_bird(blueB,target_bs):
-                            damage_done(blueB,target_side,target_pos,target,active_player,block_side,Prev_cords_B,False)
-                        # screen.blit(pygame.transform.scale(blueA.surface,(player_bird_size/1.25,player_bird_size/1.25)),(b_Rect.x,b_Rect.y+block_side))
-                        # screen.blit(pygame.transform.scale(blueB.surface,(player_bird_size/1.25,player_bird_size/1.25)),(b_Rect.x,b_Rect.y-block_side))
-                        
-                    launch_bird(b,b_Rect,mouse,active_player.start,factor_x)
-                    if (b.being_dragged):
-                        b.x = mouse[0]
-                        b.y = mouse[1]
-                        x_dist = (b.x-active_player.start[0])
-                        y_dist = (b.y-active_player.start[1])
-                        dist = math.sqrt(x_dist**2+y_dist**2)
-                        theta = math.atan2(y_dist,x_dist)
-                        if dist > 100*factor_x:
-                            b.x = active_player.start[0] + 100*factor_x*math.cos(theta)
-                            b.y = active_player.start[1] + 100*factor_x*math.sin(theta)
-                        show_trajectory(b,active_player.start,30,screen,target_side,factor_x,factor_y)
-                        show_stretch(b,active_player.start,screen)
-                    
-                    if collide_bird(b,ground_rect):
-                        b.velocity[0] *= 0.7
-                        b.velocity[1] *= -0.7
-                        b.y = ground_rect.y
-                    if triplify_bool:
-                        if collide_bird(blueA,ground_rect):
-                            blueA.velocity[0] *= 0.7
-                            blueA.velocity[1] *= -0.7
-                            blueA.y = ground_rect.y
-                        if collide_bird(blueB,ground_rect):
-                            blueB.velocity[0] *= 0.7
-                            blueB.velocity[1] *= -0.7
-                            blueB.y = ground_rect.y
-
-
-
-                    if collide_bird(b,target_bs):
-
-                        # if triplify_bool:
-                        #     print("inside")
-                        #     b.y += block_side
-                        #     if collide_bird(b,target_bs):
-                        #         damage_done_by_dupli(b,target_side,target_pos,target,block_side)
-                        #     b.y -= 2*block_side
-                        #     if collide_bird(b,target_bs):
-                        #         damage_done_by_dupli(b,target_side,target_pos,target,block_side)
-                        #     triplify_bool = False
-                        #     b.y += block_side
-                        # if not bomb_ability_active:
-                        #     damage_done(b,target_side,target_pos,target,active_player,block_side,Prev_cords,False)
-
-                        if bomb_ability_active:
-                            bomb_ability(b,target,active_player)
-                            max_bomb_usage -= 1
-                            bomb_ability_active = False
-                        elif red_ability_active:
-                            damage_done(b,target_side,target_pos,target,active_player,block_side,Prev_cords,red_ability_active)
-                        else:
-                            damage_done(b,target_side,target_pos,target,active_player,block_side,Prev_cords,False)
-
-                    Prev_cords = (b.x,b.y)
-                    if triplify_bool:
-                        Prev_cords_A = (blueA.x,blueA.y)
-                        Prev_cords_B = (blueB.x,blueB.y)
-
-                       
-
-                    if b.y > height or b.x < 0 or b.x > width : 
-                        b.isactive = False
-                        b.ready = False
-                        b.being_dragged = False
-                        active_player.deactivate_player()
-                        target.activate_player()
+                    if not pause_button.active:
                         if triplify_bool:
-                            triplify_bool = False
-                            can_active_triplify = True
-                        if red_ability_active:
-                            b.surface = OGsurf
-                            red_ability_active  = False
+                            blueA_rect.center = (blueA.x,blueA.y)
+                            blueB_rect.center = (blueB.x,blueB.y)
+                            if collide_bird(blueA,target_bs):
+                                damage_done(blueA,target_side,target_pos,target,active_player,block_side,Prev_cords_A,False)
+                            if collide_bird(blueB,target_bs):
+                                damage_done(blueB,target_side,target_pos,target,active_player,block_side,Prev_cords_B,False)
+                            # screen.blit(pygame.transform.scale(blueA.surface,(player_bird_size/1.25,player_bird_size/1.25)),(b_Rect.x,b_Rect.y+block_side))
+                            # screen.blit(pygame.transform.scale(blueB.surface,(player_bird_size/1.25,player_bird_size/1.25)),(b_Rect.x,b_Rect.y-block_side))
+                        if not b.ready:    
+                            launch_bird(b,b_Rect,mouse,active_player.start,factor_x)
+                            if (b.being_dragged):
+                                b.x = mouse[0]
+                                b.y = mouse[1]
+                                x_dist = (b.x-active_player.start[0])
+                                y_dist = (b.y-active_player.start[1])
+                                dist = math.sqrt(x_dist**2+y_dist**2)
+                                theta = math.atan2(y_dist,x_dist)
+                                if dist > 100*factor_x:
+                                    b.x = active_player.start[0] + 100*factor_x*math.cos(theta)
+                                    b.y = active_player.start[1] + 100*factor_x*math.sin(theta)
+                                show_trajectory(b,active_player.start,30,screen,target_side,factor_x,factor_y)
+                                show_stretch(b,active_player.start,screen,factor_x,DARK_BROWN)
+
+                        
+                        if collide_bird(b,ground_rect):
+                            b.velocity[0] *= 0.7
+                            b.velocity[1] *= -0.7
+                            b.y = ground_rect.y
+                        if triplify_bool:
+                            if collide_bird(blueA,ground_rect):
+                                blueA.velocity[0] *= 0.7
+                                blueA.velocity[1] *= -0.7
+                                blueA.y = ground_rect.y
+                            if collide_bird(blueB,ground_rect):
+                                blueB.velocity[0] *= 0.7
+                                blueB.velocity[1] *= -0.7
+                                blueB.y = ground_rect.y
+
+
+
+                        if collide_bird(b,target_bs):
+
+                            # if triplify_bool:
+                            #     print("inside")
+                            #     b.y += block_side
+                            #     if collide_bird(b,target_bs):
+                            #         damage_done_by_dupli(b,target_side,target_pos,target,block_side)
+                            #     b.y -= 2*block_side
+                            #     if collide_bird(b,target_bs):
+                            #         damage_done_by_dupli(b,target_side,target_pos,target,block_side)
+                            #     triplify_bool = False
+                            #     b.y += block_side
+                            # if not bomb_ability_active:
+                            #     damage_done(b,target_side,target_pos,target,active_player,block_side,Prev_cords,False)
+
+                            if bomb_ability_active:
+                                blast_starts = bomb_ability(b,target,active_player,target_side,target_pos,block_side,target,bomb_audio)
+                                start_time = current_time
+                                max_bomb_usage -= 1
+                                bomb_ability_active = False
+
+
+
+                            elif red_ability_active:
+                                damage_done(b,target_side,target_pos,target,active_player,block_side,Prev_cords,red_ability_active)
+                            else:
+                                damage_done(b,target_side,target_pos,target,active_player,block_side,Prev_cords,False)
+
+                        Prev_cords = (b.x,b.y)
+                        if triplify_bool:
+                            Prev_cords_A = (blueA.x,blueA.y)
+                            Prev_cords_B = (blueB.x,blueB.y)
+
+                        
+
+                        if b.y > height or b.x < 0 or b.x > width : 
+                            b.isactive = False
+                            b.ready = False
+                            b.being_dragged = False
+                            active_player.deactivate_player()
+                            target.activate_player()
+                            if triplify_bool:
+                                triplify_bool = False
+                                can_active_triplify = True
+                            if red_ability_active:
+                                b.surface = OGsurf
+                                red_ability_active  = False
 
                         
 
@@ -237,9 +260,26 @@ while True:
                     score_0_Rect = text_surface_0.get_rect(center = (width/4,height/4+50*factor_y))
                     screen.blit(score_1, score_1_Rect)  
                     screen.blit(score_0, score_0_Rect)
+                    screen.blit(b.surface,b_Rect)
+                    screen.blit(sling_0_hand,(sling0_rect.x - 5*factor_x,sling0_rect.y-2*factor_y))
+                    screen.blit(sling_1_hand,(sling1_rect.x + (sling0x-slinghandx+5)*factor_x,sling1_rect.y-2*factor_y))
+                    if blast_starts:
+                        t = current_time - start_time
+                        if t > 1:
+                            blast_starts = False
+                            b.isactive = False
+                            b.being_dragged = False
+                            active_player.deactivate_player()
+                            target.activate_player()
+                        else:
+                            blast_surf = pygame.transform.scale(bomb_blast_surf,(player_bird_size*5*t,player_bird_size*5*t))
+                            blast_rect = blast_surf.get_rect(center = (b.x,b.y))
+                            screen.blit(blast_surf,blast_rect)
+                            print("hi")
 
 
-                if b.ready:
+                if b.ready and not pause_button.active:
+
                     if triplify_bool:
                         blueA.update(factor_x,factor_y)
                         blueB.update(factor_x,factor_y)
@@ -255,6 +295,8 @@ while True:
                             can_active_triplify = False
                             (blueA.x,blueA.y) = (b.x,b.y + block_side/2)
                             (blueB.x,blueB.y) = (b.x,b.y - block_side/2)
+                            b.velocity[0] *= 0.75
+                            b.velocity[1] *= 0.75
                             blueA.velocity = b.velocity.copy()
                             blueB.velocity = b.velocity.copy()
                             blueA.isactive = blueB.isactive = True
@@ -289,9 +331,8 @@ while True:
             screen.blit(logo_surf,logo_rect)
             play_button.display()
     else:
-        screen.blit(loading_screen_surf,(0,0))
         loading_time -= 1
-        pygame.draw.line(screen,"White",(width/4,height/4),(3*width/4 - (loading_time**2/900)*factor_x,height/4),int(50*factor_y))
+        pygame.draw.line(screen,"White",(width/4,3*height/4),(3*width/4 - (loading_time**2/900)*factor_x,3*height/4),int(50*factor_y))
 
     
     if game_over:
@@ -302,6 +343,9 @@ while True:
         if (winner_timer < 0):
             winner_display(winner,screen,font_winner,factor_x)
         else:
+            if not played_game_over:
+                game_over_audio.play()
+                played_game_over = not played_game_over
             screen.blit(game_over_logo,game_over_logo_rect)
             winner_timer-=3
 

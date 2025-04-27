@@ -5,6 +5,13 @@ from Modules import birds,blocks,players,Buttons
 power_factor = 5*2.25
 t = 1
 crown_fact = 1
+pygame.mixer.init()
+wood_crack = pygame.mixer.Sound("Resources/audio/wood-crack.mp3")
+stone_crack = pygame.mixer.Sound("Resources/audio/stone-crack.mp3")
+ice_crack = pygame.mixer.Sound("Resources/audio/ice-crack.mp3")
+bir_scream = pygame.mixer.Sound("Resources/audio/bird_scream.mp3")
+block_crack_sound_list = [None,wood_crack,stone_crack,ice_crack]
+current_bg = 0
 
 
 
@@ -14,6 +21,7 @@ def launch_bird(object : birds.bird, rect : pygame.Rect, mouse_pos, sling_pos,fa
             object.being_dragged = True
     if object.being_dragged:
         if(pygame.mouse.get_just_released()[0]):
+            bir_scream.play()
             object.ready = True
             object.velocity[0] = (sling_pos[0] - object.x)*power_factor/factor
             object.velocity[1] = (sling_pos[1] - object.y)*power_factor/factor
@@ -30,21 +38,20 @@ def show_trajectory(object : birds.bird,sling_pos,number,screen : pygame.Surface
         if ((-1)**(side-1)*x<(-1)**(side-1)*(3*screen.get_width()/4 + (side-1)*screen.get_width()/2)):
             pygame.draw.circle(screen,"Black", (x,y),10)
 
-def show_stretch(b : birds.bird, start,screen : pygame.Surface):
-    # pygame.draw.line
-    pass
-
-
+def show_stretch(b : birds.bird, start,screen : pygame.Surface,factor,color):
+    pygame.draw.line(screen,color,(start[0]-20*factor,start[1]),(b.x,b.y),int(10*factor))
+    pygame.draw.line(screen,color,(start[0]+20*factor,start[1]),(b.x,b.y),int(10*factor))
 
 def collide_bird(bird: birds.bird, block_rect: pygame.Rect):
     if(block_rect.collidepoint((bird.x,bird.y))):
         return True
     else: return False
 
-def show_bird_menu(b1 : Buttons.Button,b2:Buttons.Button,b3:Buttons.Button,b4:Buttons.Button,screen : pygame.Surface, name: str,font:pygame.font,factor_y):
+def show_bird_menu(b1 : Buttons.Button,b2:Buttons.Button,b3:Buttons.Button,b4:Buttons.Button,screen : pygame.Surface, name: str,font:pygame.font,factor_y,intro):
     heading_surf = font.render("Choose 3 birds "+ name, True, "Black")
     heading_rect = heading_surf.get_rect(center = (b1.pos[0], b1.pos[1] - 200*factor_y))
     screen.blit(heading_surf, heading_rect)
+    screen.blit(intro,(b1.des_pos[0] + 10, b1.des_pos[1] + 10))
     b1.display()
     b2.display()
     b3.display()
@@ -78,10 +85,13 @@ def damage_done(bird : birds.bird, done_to_side,bs_pos,player_target: players.pl
     # damage_done_by_dupli(bird,done_to_side,bs_pos,player_target,block_side)
     block_index = blocks.get_block((bird.x,bird.y),done_to_side,bs_pos,block_side)
     if (player_target.bs.health[block_index[0],block_index[1]])>0:
+        type_block =player_target.bs.arr[block_index[0],block_index[1]]
+        block_crack_sound_list[type_block].play()
+
         # bird.isactive = False
         # bird.ready = False
         speed = (bird.velocity[0]**2 + bird.velocity[1]**2)**0.5
-        if (player_target.bs.arr[block_index[0],block_index[1]] == bird.type):
+        if (type_block == bird.type):
             dec = int(100*speed/1500)
         elif bird.type == 0:
             dec = int(60*speed/1500)
@@ -103,6 +113,7 @@ def damage_done(bird : birds.bird, done_to_side,bs_pos,player_target: players.pl
                 score_update(player_target,50,block_index[0],block_index[1]+1)
 
         score_update(player_target,dec,block_index[0],block_index[1])
+        print(player_target.bs.health)
 
 
         # player_target.bs.health[block_index[0],block_index[1]] -= dec
@@ -130,8 +141,8 @@ def draw_input(screen: pygame.Surface,input_rect : pygame.Rect, color, player : 
     text_surface = font.render(player_name,True,"White")
     screen.blit(text_surface,(input_rect.x + 130*factor_x, input_rect.y + 60*factor_y))
 
-def select_birds(player: players.player, b1:Buttons.Button,b2:Buttons.Button,b3:Buttons.Button,b4:Buttons.Button,screen : pygame.Surface,font,B1,B2,B3,B4,factor_y):
-    show_bird_menu(b1,b2,b3,b4,screen,player.name,font,factor_y)
+def select_birds(player: players.player, b1:Buttons.Button,b2:Buttons.Button,b3:Buttons.Button,b4:Buttons.Button,screen : pygame.Surface,font,B1,B2,B3,B4,factor_y,intro):
+    show_bird_menu(b1,b2,b3,b4,screen,player.name,font,factor_y,intro)
     if b1.is_clicked():
         player.birds.append(B1)
     if b2.is_clicked():
@@ -161,19 +172,25 @@ def speed_ability (bird: birds.bird):
     bird.velocity[0] = 2500*math.cos(theta)
     bird.velocity[1] = 2500*math.sin(theta)
 
-def bomb_ability(bird : birds.bird, target: players.player, active_player : players.player):
-    for i in range(2):
-        for j in range (5):
-            if target.bs.health[i,j] > 0:
-                target.bs.health[i,j] -= 10
-                target.score -= 10
-                if (target.bs.health[i,j]<0):
-                    target.score -= target.bs.health[i,j]
-    bird.isactive = False
-    bird.ready = False
-    bird.being_dragged = False
-    active_player.deactivate_player()
-    target.activate_player()
+def bomb_ability(bird : birds.bird, target: players.player, active_player : players.player,done_to_side,bs_pos,block_side,player_target,audio):
+    block_index = blocks.get_block((bird.x,bird.y),done_to_side,bs_pos,block_side)
+    if (player_target.bs.health[block_index[0],block_index[1]])>0:
+        audio.play()
+
+        for i in range(2):
+            for j in range (5):
+                if target.bs.health[i,j] > 0:
+                    target.bs.health[i,j] -= 25
+                    target.score -= 25
+                    if (target.bs.health[i,j]<0):
+                        target.score -= target.bs.health[i,j]
+        # bird.isactive = False
+        bird.ready = False
+        return True
+    return False
+        # bird.being_dragged = False
+        # active_player.deactivate_player()
+        # target.activate_player()
 
 # def damage_done_by_dupli(bird : birds.bird, done_to_side,bs_pos,player_target: players.player, block_side):
 #     block_index = blocks.get_block((bird.x,bird.y),done_to_side,bs_pos,block_side)
@@ -262,9 +279,6 @@ def point_of_contact(x1,x2,y1,y2,inside,outside):
 
 def ground_collision():
     pass
-            
-
-
 
 
 
