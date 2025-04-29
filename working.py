@@ -1,6 +1,9 @@
 import pygame
 import math
+import sys
+import os
 from Modules import birds,blocks,players,Buttons
+import random
 
 power_factor = 5*2.25
 t = 1
@@ -63,6 +66,8 @@ def score_update(player_target : players.player, dec , i, j):
         player_target.score = player_target.score - dec
         if player_target.bs.health[i,j] < 0:
             player_target.score -= player_target.bs.health[i,j]
+        player_target.score = int(player_target.score)
+        
 
 
 def bounce_back(bird : birds.bird , x1,x2,y1,y2,inside,outside,block_side):
@@ -113,7 +118,6 @@ def damage_done(bird : birds.bird, done_to_side,bs_pos,player_target: players.pl
                 score_update(player_target,50,block_index[0],block_index[1]+1)
 
         score_update(player_target,dec,block_index[0],block_index[1])
-        print(player_target.bs.health)
 
 
         # player_target.bs.health[block_index[0],block_index[1]] -= dec
@@ -179,11 +183,12 @@ def bomb_ability(bird : birds.bird, target: players.player, active_player : play
 
         for i in range(2):
             for j in range (5):
-                if target.bs.health[i,j] > 0:
-                    target.bs.health[i,j] -= 25
-                    target.score -= 25
-                    if (target.bs.health[i,j]<0):
-                        target.score -= target.bs.health[i,j]
+                score_update(target,25,i,j)
+                # if target.bs.health[i,j] > 0:
+                #     target.bs.health[i,j] -= 25
+                #     target.score -= 25
+                #     if (target.bs.health[i,j]<0):
+                #         target.score -= target.bs.health[i,j]
         # bird.isactive = False
         bird.ready = False
         return True
@@ -277,24 +282,64 @@ def point_of_contact(x1,x2,y1,y2,inside,outside):
         return (X,closer_y)
     return (closer_x,closer_y)
 
-def ground_collision():
-    pass
+def random_player_activation(player1 : players.player, player0 : players.player):
+    num = random.randint(0,1)
+    if num:
+        player1.activate_player()
+    else:
+        player0.activate_player()
+
+def begin_game(dim_surface,screen,player0,player1,first_to_zero_surf,time_elapsed,VS,small_font,large_font):
+    width,height = screen.get_size()
+    factor_x = width/1280
+    factor_y = height/720
+    screen.blit(dim_surface,(0,0))
+    first_to_zero_surf = pygame.transform.scale(first_to_zero_surf,(300*factor_x,300*factor_y))
+    VS = pygame.transform.scale(VS,(150*factor_x,150*factor_y))
+    first_to_zero_rect  = first_to_zero_surf.get_rect(center = (width/2,height/5))   
+    VS_rect = VS.get_rect(center = (width/2,4*height/7))
+    get_fonts_on_screen(player0,small_font,large_font,time_elapsed,screen)
+    get_fonts_on_screen(player1,small_font,large_font,time_elapsed,screen)
+    screen.blit(first_to_zero_surf,first_to_zero_rect)
+    screen.blit(VS,VS_rect)
 
 
 
+def switch_players(b,active_player,target,wind_state):
+    wind_state[0] = False
+    wind_state[1] = None
+    b.isactive = False
+    b.ready = False
+    b.being_dragged = False
+    active_player.deactivate_player()
+    target.activate_player()
 
+def check_if_stuck(b,target_bs,prev_cords,factor,active_player,target,wind_state):
+    if collide_bird(b,target_bs) and abs(b.x - prev_cords[0]) < 2.5*factor and abs(b.y - prev_cords[1]) < 2.5*factor:
+         switch_players(b,active_player,target,wind_state)
+         return True
+    return False
 
-    
+def get_fonts_on_screen(player : players.player ,small_font,large_font,time_elapsed,screen):
+    width,height = screen.get_size()
+    factor_x = width/1280
+    factor_y = height/720
+    dirn = (-1)**player.side
+    shadow = large_font.render(player.name, True , (0,0,0))
+    name = small_font.render(player.name, True , (255,255,255))
+    name_rect = name.get_rect(center = (width/2 - dirn*max((0.25 - time_elapsed**3)*1000*factor_x,0), 5*height/12 + player.side*height/3))
+    shadow_rect = shadow.get_rect(topleft=(name_rect.x + factor_x, name_rect.y+factor_y))
+    screen.blit(shadow,shadow_rect)
+    screen.blit(name,name_rect)
 
+def load_image(path,size):
+    im = pygame.image.load(path).convert_alpha()
+    return pygame.transform.scale(im,size)
 
-
-
-
-    
-
-    
-
-
-
-
-
+def display_score(font,player,color,width,height,factor,screen):
+        score= font.render(str(player.score), True, color)
+        score_Rect = score.get_rect(center = (width/4+player.side*width/2,height/4+50*factor))
+        screen.blit(score, score_Rect)
+        g = min(255 * player.score/500,255)
+        r = min(255 * (2 - player.score/500),255)
+        pygame.draw.line(screen,(r,g,0),(width/4+player.side*width/2 - 100*factor,height/4 + 100 * factor),(width/4+player.side*width/2 - (100 - player.score/5)*factor,height/4 + 100 * factor),int(25*factor))

@@ -82,7 +82,7 @@ class block:
 class block_set:
     def __init__(self, screen: pygame.Surface):
         self.arr = np.random.choice([1,2,3], size = (2,5))
-        self.health = np.array([[100,100,100,100,100],[100,100,100,100,100]])   
+        self.health = 100 * np.ones((2,5))   
         self.screen = screen
         self.cords = []
 
@@ -104,6 +104,9 @@ class block_set:
         out = block_set(self.screen)
         out.arr = self.arr
         return out
+
+    def reset(self):
+        self.health = 100 * np.ones((2,5))   
 
     
     

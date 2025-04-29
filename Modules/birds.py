@@ -5,6 +5,7 @@ all_type = 0
 wood_type = 1
 stone_type = 2
 ice_type = 3
+wind_resistance = 1000
 
 
 
@@ -20,9 +21,11 @@ class bird():
         self.velocity = [0,0]
         self.being_dragged = False
 
-    def update(self,factor_x,factor_y):
+    def update(self,factor_x,factor_y,wind_state):
         if self.isactive:
             self.velocity[1] += g*(dt*factor_y)
+            if wind_state[0]:
+                self.velocity[0] += (wind_resistance * dt *factor_y)*(-1)**wind_state[1]
             self.x += self.velocity[0]*(dt*factor_y)*factor_x
             self.y += (self.velocity[1]*dt*factor_y)*factor_y
 
