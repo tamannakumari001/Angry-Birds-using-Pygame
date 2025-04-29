@@ -1,6 +1,6 @@
 import pygame
 g=561
-dt = (1/300)
+dt = (1/200)
 all_type = 0
 wood_type = 1
 stone_type = 2

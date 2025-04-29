@@ -1,5 +1,4 @@
 from initialized import *
-# import random
 
 
 while True:
@@ -163,7 +162,7 @@ while True:
                 target.show_wind_button(wind_state)
                 active_player.show_wind_button(wind_state)
 
-                # playing(font,block_side,b,b_Rect,screen,mouse,active_player,target_side,factor_x,factor_y,target_bs,height,width,bomb_ability_active,max_bomb_usage,target,target_pos,player1,player0,text_surface_1,text_surface_0)
+
                 if (b.isactive):
                     b_Rect.center = (b.x,b.y)
                     if triplify_bool:
@@ -289,6 +288,8 @@ while True:
                         if b.type == 0 and active_player.max_big_red_active > 0:
                             active_player.max_big_red_active -= 1
                             red_ability_active = True
+                            b.velocity[1] *= 1.5
+                            b.velocity[0] *= 1.5
                             OGsurf = pygame.transform.flip((pygame.transform.scale(b.surface1, (player_bird_size,player_bird_size))),flip_x=not target_side,flip_y=False)
                             b.surface = big_red_surface
                     
@@ -323,8 +324,6 @@ while True:
                 else:                 
                     if (retry_button.is_clicked()):
                         wind_state = [False,None]
-                        # if red_ability_active:
-                        #     b.surface = OGsurf
                         bomb_ability_active = False
                         triplify_bool = False
                         max_bomb_usage = random.randint(0,5)

@@ -68,11 +68,6 @@ class block:
             if (self.type == "stone" and 0 < self.health <= 25):
                 surf =pygame.transform.scale(stone25,(self.side,self.side))
             self.screen.blit(surf,self.pos)
-    def reddify(self):
-        if self.health>0:
-            red_surf = pygame.Surface((self.side,self.side),pygame.SRCALPHA)
-            red_surf.fill((255,0,0,64))
-            self.screen.blit(red_surf,self.pos)
 
 
 
@@ -93,11 +88,7 @@ class block_set:
                 myblock.create_block()
                 if (myblock.rectangle.x,myblock.rectangle.y) not in self.cords:
                     self.cords.append((myblock.rectangle.x,myblock.rectangle.y))
-    def reddify_block_set(self,pos,side,block_side):
-        for i in range(len(self.arr)):
-            for j in range (len(self.arr[i])):
-                myblock = block(self.arr[i,j],(i,j),pos,self.screen,side,self.health[i,j],block_side)
-                myblock.reddify()
+
     
 
     def copy(self):

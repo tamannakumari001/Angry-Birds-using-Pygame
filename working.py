@@ -72,10 +72,6 @@ def score_update(player_target : players.player, dec , i, j):
 
 def bounce_back(bird : birds.bird , x1,x2,y1,y2,inside,outside,block_side):
     poc = point_of_contact(x1,x2,y1,y2,inside,outside)
-    # sign = (-1)**target_side
-    # i = block_index[0]
-    # j = block_index[1]
-    # if block_index[1]>0 and player_target.bs.health[i,j-1] >0 and poc[1] == y1:
 
     bird.x = poc[0]
     bird.y = poc[1]
@@ -87,14 +83,12 @@ def bounce_back(bird : birds.bird , x1,x2,y1,y2,inside,outside,block_side):
 
 
 def damage_done(bird : birds.bird, done_to_side,bs_pos,player_target: players.player, player_play:players.player,block_side,prev_cords,bool):
-    # damage_done_by_dupli(bird,done_to_side,bs_pos,player_target,block_side)
+
     block_index = blocks.get_block((bird.x,bird.y),done_to_side,bs_pos,block_side)
     if (player_target.bs.health[block_index[0],block_index[1]])>0:
         type_block =player_target.bs.arr[block_index[0],block_index[1]]
         block_crack_sound_list[type_block].play()
 
-        # bird.isactive = False
-        # bird.ready = False
         speed = (bird.velocity[0]**2 + bird.velocity[1]**2)**0.5
         if (type_block == bird.type):
             dec = int(100*speed/1500)
@@ -108,8 +102,7 @@ def damage_done(bird : birds.bird, done_to_side,bs_pos,player_target: players.pl
             y1 = player_target.bs.cords[5*block_index[0] + block_index[1]][1]
             x2 = x1+block_side
             y2 = y1+block_side
-            # print(x1,x2,y1,y2,prev_cords,bird.x,bird.y)
-
+ 
             bounce_back(bird,x1,x2,y1,y2,(bird.x,bird.y),prev_cords,block_side)
         else:
             dec = 100
@@ -120,22 +113,7 @@ def damage_done(bird : birds.bird, done_to_side,bs_pos,player_target: players.pl
         score_update(player_target,dec,block_index[0],block_index[1])
 
 
-        # player_target.bs.health[block_index[0],block_index[1]] -= dec
-        # player_target.score = player_target.score - dec
-        # if player_target.bs.health[block_index[0],block_index[1]] < 0:
-        #     player_target.score -= player_target.bs.health[block_index[0],block_index[1]]
-
-
-        
-        # if blocks.get_block((bird.x-(block_side)*(-1)**done_to_side,bird.y),done_to_side,bs_pos,block_side)[0] == block_index[0]-1:
-        #     bird.velocity[0] *= -1
-        # if blocks.get_block((bird.x,bird.y-block_side),done_to_side,bs_pos,block_side)[1] == block_index[1]-1:
-        #      bird.velocity[1] *= -1
-        # if blocks.get_block((bird.x,bird.y+block_side),done_to_side,bs_pos,block_side)[1] == block_index[1]+1:
-        #     bird.velocity[1] *= -1
-        # player_play.deactivate_player()
-        # player_target.activate_player()
-
+    
 
 def draw_input(screen: pygame.Surface,input_rect : pygame.Rect, color, player : str,font : pygame.font,player_name,border,factor_x,factor_y):
     pygame.draw.rect(screen,color,input_rect,border_radius=int(10*factor_y))
@@ -184,75 +162,11 @@ def bomb_ability(bird : birds.bird, target: players.player, active_player : play
         for i in range(2):
             for j in range (5):
                 score_update(target,25,i,j)
-                # if target.bs.health[i,j] > 0:
-                #     target.bs.health[i,j] -= 25
-                #     target.score -= 25
-                #     if (target.bs.health[i,j]<0):
-                #         target.score -= target.bs.health[i,j]
-        # bird.isactive = False
+    
         bird.ready = False
         return True
     return False
-        # bird.being_dragged = False
-        # active_player.deactivate_player()
-        # target.activate_player()
 
-# def damage_done_by_dupli(bird : birds.bird, done_to_side,bs_pos,player_target: players.player, block_side):
-#     block_index = blocks.get_block((bird.x,bird.y),done_to_side,bs_pos,block_side)
-#     if (player_target.bs.health[block_index[0],block_index[1]])>0:
-#         bird.isactive = False
-#         speed = (bird.velocity[0]**2 + bird.velocity[1]**2)**0.5
-#         if (player_target.bs.arr[block_index[0],block_index[1]] == bird.type):
-#             dec = int(50*speed/1500)
-#         elif bird.type == 0:
-#             dec = int(30*speed/1500)
-#         else:
-#             dec = int(15*speed/1500)
-#         player_target.bs.health[block_index[0],block_index[1]] -= dec
-#         player_target.score = player_target.score - dec
-#         if player_target.bs.health[block_index[0],block_index[1]] < 0:
-#             player_target.score -= player_target.bs.health[block_index[0],block_index[1]]
-
-
-
-
-# def playing(font,block_side,b,b_Rect,screen,mouse,active_player,target_side,factor_x,factor_y,target_bs,height,width,bomb_ability_active,max_bomb_usage,target,target_pos,player1,player0,text_surface_1,text_surface_0):
-#     if (b.isactive):
-#         b_Rect.center = (b.x,b.y)
-#         screen.blit(b.surface,b_Rect)
-#         launch_bird(b,b_Rect,mouse,active_player.start,target_side)
-#         if (b.being_dragged):
-#             show_trajectory(b,active_player.start,10,screen,target_side,factor_x,factor_y)
-
-#         if collide_bird(b,target_bs):
-#             if not bomb_ability_active:
-#                 damage_done(b,target_side,target_pos,target,active_player,block_side)
-#             else:
-#                 bomb_ability(b,target,active_player)
-#                 max_bomb_usage -= 1
-#                 bomb_ability_active = False
-#         if b.y > height or b.x < 0 or b.x > width : 
-#             b.isactive = False
-#             b.ready = False
-#             b.being_dragged = False
-#             active_player.deactivate_player()
-#             target.activate_player()
-
-#         score_1 = font.render(str(player1.score), True, "Black")
-#         score_1_Rect = text_surface_1.get_rect(center = (3*width/4,height/4+50*factor_y))
-#         score_0 = font.render(str(player0.score), True, "Black")
-#         score_0_Rect = text_surface_0.get_rect(center = (width/4,height/4+50*factor_y))
-#         if b.ready:
-#             b.update(factor_x,factor_y)
-#             if pygame.mouse.get_pressed()[2]:
-#                 if b.type == 2 and max_bomb_usage>0:
-#                     bomb_ability_active = True
-#                 if b.type==1:    
-#                     speed_ability(b)
-
-
-#         screen.blit(score_1, score_1_Rect)  
-#         screen.blit(score_0, score_0_Rect)
 
 def in_between(x,bound1, bound2):
     return bound1 <= x <= bound2 or bound2 <= x <= bound1
